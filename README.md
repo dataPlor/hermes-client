@@ -38,15 +38,24 @@ HERMES_MCP_URL=https://hermes-dataplor-e0ce1df86095.herokuapp.com
 
 ### Running the project
 
+Run the main module:
 ```bash
-# Run the main module
 deno task start
+```
 
-# Run in development mode with file watching
+Run in development mode with file watching:
+```bash
 deno task dev
+```
 
-# Run the Hermes MCP client
+Run the Hermes MCP client:
+```bash
 deno task hermes "Show me all available brands and business categories"
+```
+
+Run example demonstrations:
+```bash
+deno task hermes-example
 ```
 
 ### Using the Hermes Client
@@ -112,17 +121,20 @@ deno task hermes "Analyze brand distribution across retail business segments"
 ### Testing
 
 ```bash
-# Run tests (when test files are created)
 deno task test
 ```
 
 ### Code Quality
 
-```bash
-# Format code
-deno task fmt
+Format 
 
-# Lint code
+```bash
+deno task fmt
+```
+
+Lint
+
+```bash
 deno task lint
 ```
 
@@ -169,6 +181,7 @@ Lists all tools available from the MCP server. Shows "fallback mode" message whe
 - `dev` - Run with file watching and required permissions
 - `start` - Run the main module
 - `hermes` - Run the Hermes MCP client with a search query
+- `hermes-example` - Run a series of examples that demonstrate the client.
 - `test` - Run all tests
 - `fmt` - Format code using Deno's formatter
 - `lint` - Lint code using Deno's linter
