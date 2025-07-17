@@ -39,20 +39,13 @@ export class HermesClient {
 
   async connect(): Promise<void> {
     try {
-      if (!HERMES_MCP_URL) {
-        throw new Error("HERMES_MCP_URL is not configured");
-      }
-
-      // Hermes MCP server requires the /mcp endpoint
-      const mcpUrl = HERMES_MCP_URL.endsWith("/mcp")
-        ? HERMES_MCP_URL
-        : `${HERMES_MCP_URL}/mcp`;
-
       console.log(
-        `🔗 Attempting to connect to Hermes MCP server (Streamable HTTP) at: ${mcpUrl}`
+        `🔗 Attempting to connect to Hermes MCP server (Streamable HTTP) at: ${HERMES_MCP_URL}`
       );
 
-      const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+      const transport = new StreamableHTTPClientTransport(
+        new URL(HERMES_MCP_URL)
+      );
 
       this.mcpClient = await createMCPClient({
         transport,
