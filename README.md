@@ -45,7 +45,7 @@ deno task start
 deno task dev
 
 # Run the Hermes MCP client
-deno task hermes "What is TypeScript?"
+deno task hermes "Find the latest research on large language models"
 ```
 
 ### Using the Hermes Client
@@ -53,20 +53,48 @@ deno task hermes "What is TypeScript?"
 The Hermes client connects to the Hermes MCP server and uses OpenAI models to provide intelligent search capabilities:
 
 ```bash
-# Basic search query
-deno task hermes "Search for Deno tutorials"
+# Search for research papers and academic content
+deno task hermes "Find recent papers on transformer architecture improvements"
 
-# Technical questions
-deno task hermes "How to implement REST APIs in TypeScript?"
+# Search for code repositories and documentation
+deno task hermes "Search for TypeScript libraries for data visualization"
 
-# General knowledge
-deno task hermes "What is machine learning?"
+# Find specific technical solutions
+deno task hermes "How to implement OAuth2 with refresh tokens in Node.js"
+
+# Search for news and current events
+deno task hermes "Latest developments in quantum computing breakthroughs"
+
+# Find detailed explanations and tutorials
+deno task hermes "Comprehensive guide to setting up Kubernetes clusters"
+```
+
+### Advanced Search Capabilities
+
+Hermes search excels at finding comprehensive, up-to-date information across various domains:
+
+```bash
+# Academic and Research
+deno task hermes "Latest breakthroughs in CRISPR gene editing technology"
+deno task hermes "Meta-analysis of machine learning bias mitigation techniques"
+
+# Software Development
+deno task hermes "Best practices for microservices architecture with event sourcing"
+deno task hermes "Performance comparison of Rust vs Go for concurrent web servers"
+
+# Business and Market Intelligence
+deno task hermes "Emerging trends in renewable energy storage solutions"
+deno task hermes "Market analysis of electric vehicle adoption in Europe 2024"
+
+# Technical Documentation
+deno task hermes "Complete guide to implementing zero-trust security architecture"
+deno task hermes "Advanced PostgreSQL performance tuning strategies"
 ```
 
 ### Testing
 
 ```bash
-# Run tests
+# Run tests (when test files are created)
 deno task test
 ```
 
@@ -112,11 +140,11 @@ Lists all tools available from the MCP server. Shows "fallback mode" message whe
 
 ## Project Structure
 
-- `mod.ts` - Main module with exported functions
-- `mod_test.ts` - Tests for the main module  
-- `hermes-client.ts` - Hermes MCP client implementation
+- `hermes-client.ts` - Main Hermes MCP client implementation and CLI interface
 - `hermes-example.ts` - Example usage patterns for the Hermes client
-- `deno.json` - Deno configuration file
+- `deno.json` - Deno configuration file with tasks and dependencies
+- `deno.lock` - Dependency lock file for reproducible builds
+- `README.md` - Project documentation
 
 ## Available Tasks
 
@@ -157,7 +185,7 @@ The project uses the Model Context Protocol (MCP) to connect with the Hermes sea
 
 1. Extend the `HermesClient` class in `hermes-client.ts`
 2. Add new methods for specific search capabilities
-3. Update tests in `mod_test.ts` or create new test files
+3. Create test files following Deno testing conventions
 4. Update this README with new functionality
 
 ### Error Handling
