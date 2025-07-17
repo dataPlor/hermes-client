@@ -1,17 +1,18 @@
-# Hermes Search
+# Hermes Business Intelligence Client
 
-A Deno project with OpenAI + Hermes MCP integration for advanced search capabilities.
+A Deno project with OpenAI + Hermes MCP integration for advanced business and brand discovery capabilities.
 
 ## Features
 
 - **Basic Deno Setup**: Standard Deno project with TypeScript support
-- **Hermes MCP Integration**: Connect to Hermes search engine via Model Context Protocol
-- **OpenAI Integration**: Use OpenAI models with MCP tools for intelligent search
-- **Streaming Responses**: Real-time streaming of search results
+- **Hermes MCP Integration**: Connect to Hermes business intelligence engine via Model Context Protocol
+- **OpenAI Integration**: Use OpenAI models with MCP tools for intelligent brand and business analysis
+- **Streaming Responses**: Real-time streaming of business intelligence results
 - **Multi-Step Tool Calling**: Enable complex workflows with `maxSteps` support
 - **Schema Definition**: Type-safe tool usage with Zod schema validation
 - **AI SDK Best Practices**: Implements latest patterns from Vercel AI SDK
 - **Graceful Error Handling**: Automatic fallback when MCP server is unavailable
+- **Business Tools**: Access to brand discovery (`listBrands`) and business categorization (`listBusinessCategories`) tools
 
 ## Getting Started
 
@@ -45,50 +46,50 @@ deno task start
 deno task dev
 
 # Run the Hermes MCP client
-deno task hermes "Find the latest research on large language models"
+deno task hermes "Show me all available brands and business categories"
 ```
 
 ### Using the Hermes Client
 
-The Hermes client connects to the Hermes MCP server and uses OpenAI models to provide intelligent search capabilities:
+The Hermes client connects to the Hermes MCP server and uses OpenAI models to provide intelligent business and brand discovery capabilities:
 
 ```bash
-# Search for research papers and academic content
-deno task hermes "Find recent papers on transformer architecture improvements"
+# Brand discovery and analysis
+deno task hermes "Show me all available brands and tell me about luxury fashion brands"
 
-# Search for code repositories and documentation
-deno task hermes "Search for TypeScript libraries for data visualization"
+# Business category exploration
+deno task hermes "List all business categories and explain the retail industry segments"
 
-# Find specific technical solutions
-deno task hermes "How to implement OAuth2 with refresh tokens in Node.js"
+# Combined brand and category insights
+deno task hermes "Find technology brands and show me relevant business categories"
 
-# Search for news and current events
-deno task hermes "Latest developments in quantum computing breakthroughs"
+# Business intelligence queries
+deno task hermes "Use the available tools to give me insights about food and beverage brands"
 
-# Find detailed explanations and tutorials
-deno task hermes "Comprehensive guide to setting up Kubernetes clusters"
+# Comprehensive business research
+deno task hermes "Analyze the automotive industry using brand and category data"
 ```
 
-### Advanced Search Capabilities
+### Advanced Business Intelligence Capabilities
 
-Hermes search excels at finding comprehensive, up-to-date information across various domains:
+Hermes excels at providing comprehensive business and brand insights using its specialized MCP tools:
 
 ```bash
-# Academic and Research
-deno task hermes "Latest breakthroughs in CRISPR gene editing technology"
-deno task hermes "Meta-analysis of machine learning bias mitigation techniques"
+# Market Research and Brand Analysis
+deno task hermes "Compare luxury brands across different business categories"
+deno task hermes "Identify emerging brands in the technology sector"
 
-# Software Development
-deno task hermes "Best practices for microservices architecture with event sourcing"
-deno task hermes "Performance comparison of Rust vs Go for concurrent web servers"
+# Industry Segmentation Analysis
+deno task hermes "Break down the food and beverage industry by business categories"
+deno task hermes "Analyze healthcare business categories and related brands"
 
-# Business and Market Intelligence
-deno task hermes "Emerging trends in renewable energy storage solutions"
-deno task hermes "Market analysis of electric vehicle adoption in Europe 2024"
+# Competitive Intelligence
+deno task hermes "Find all brands in the automotive category and analyze market positioning"
+deno task hermes "Research fashion brands and their business category classifications"
 
-# Technical Documentation
-deno task hermes "Complete guide to implementing zero-trust security architecture"
-deno task hermes "Advanced PostgreSQL performance tuning strategies"
+# Business Strategy Research
+deno task hermes "Identify brand gaps in underserved business categories"
+deno task hermes "Analyze brand distribution across retail business segments"
 ```
 
 ### Testing
