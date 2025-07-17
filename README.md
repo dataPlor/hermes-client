@@ -54,19 +54,22 @@ deno task hermes "Show me all available brands and business categories"
 The Hermes client connects to the Hermes MCP server and uses OpenAI models to provide intelligent business and brand discovery capabilities:
 
 ```bash
-# Brand discovery and analysis
 deno task hermes "Show me all available brands and tell me about luxury fashion brands"
+```
 
-# Business category exploration
+```bash
 deno task hermes "List all business categories and explain the retail industry segments"
+```
 
-# Combined brand and category insights
+```bash
 deno task hermes "Find technology brands and show me relevant business categories"
+```
 
-# Business intelligence queries
+```bash
 deno task hermes "Use the available tools to give me insights about food and beverage brands"
+```
 
-# Comprehensive business research
+```bash
 deno task hermes "Analyze the automotive industry using brand and category data"
 ```
 
@@ -75,20 +78,34 @@ deno task hermes "Analyze the automotive industry using brand and category data"
 Hermes excels at providing comprehensive business and brand insights using its specialized MCP tools:
 
 ```bash
-# Market Research and Brand Analysis
 deno task hermes "Compare luxury brands across different business categories"
+```
+
+```bash
 deno task hermes "Identify emerging brands in the technology sector"
+```
 
-# Industry Segmentation Analysis
+```bash
 deno task hermes "Break down the food and beverage industry by business categories"
+```
+
+```bash
 deno task hermes "Analyze healthcare business categories and related brands"
+```
 
-# Competitive Intelligence
+```bash
 deno task hermes "Find all brands in the automotive category and analyze market positioning"
-deno task hermes "Research fashion brands and their business category classifications"
+```
 
-# Business Strategy Research
+```bash
+deno task hermes "Research fashion brands and their business category classifications"
+```
+
+```bash
 deno task hermes "Identify brand gaps in underserved business categories"
+```
+
+```bash
 deno task hermes "Analyze brand distribution across retail business segments"
 ```
 
