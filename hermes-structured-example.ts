@@ -26,11 +26,11 @@ async function runStructuredExamples(): Promise<void> {
     }
     console.log("\n" + "=".repeat(50) + "\n");
 
-    // Example 2: Legacy Format (Structured data approach)
-    console.log("📍 Example 2: Legacy Format Response");
+    // Example 2: Legacy Format (Structured data approach) - matches Swagger schema
+    console.log("📍 Example 2: Legacy Format Response (Swagger Schema)");
     try {
       const legacyResult = await client.searchWithLegacyFormat(
-        "Show me brands and business categories for restaurants"
+        "Find pizza in Oceanside, CA"
       );
       console.log("Legacy Response:", JSON.stringify(legacyResult, null, 2));
     } catch (error) {

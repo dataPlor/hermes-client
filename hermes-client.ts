@@ -2,8 +2,8 @@ import { load } from "@std/dotenv";
 import {
   experimental_createMCPClient as createMCPClient,
   generateText,
-  streamText,
   type LanguageModel,
+  streamText,
 } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
@@ -38,15 +38,23 @@ export const AreaSchema = z.object({
 export const BrandSchema = z.object({
   key: z.string(),
   name: z.string(),
+  object: z.literal("brand").optional(),
+  website: z.string().nullable().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+  is_chain: z.boolean().optional(),
+  estimated_count: z.number().nullable().optional(),
+  estimated_counts_by_country: z.record(z.number()).nullable().optional(),
   business_category_ids: z.array(z.string()).optional(),
-  object: z.literal("brand"),
+  wikipedia: z.string().optional(),
 });
 
 export const BusinessCategorySchema = z.object({
   key: z.string(),
   en: z.string(),
-  path: z.string(),
-  object: z.literal("business_category"),
+  object: z.literal("business_category").optional(),
+  path: z.string().optional(),
+  coordinates: z.string().optional(),
 });
 
 export const LegacyAISearchResponseSchema = z.object({
@@ -97,7 +105,6 @@ const encoder = new TextEncoder();
 export class HermesClient {
   private mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
   private model: LanguageModel;
-  private fallbackMode = false;
 
   constructor() {
     const openai = createOpenAI({
@@ -123,9 +130,10 @@ export class HermesClient {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.warn("⚠️  Failed to connect to Hermes MCP server:", errorMessage);
-      console.log("🔄 Switching to fallback mode (OpenAI only, no MCP tools)");
-      this.fallbackMode = true;
+      console.error("❌ Failed to connect to Hermes MCP server:", errorMessage);
+      throw new Error(
+        `Failed to connect to Hermes MCP server: ${errorMessage}`
+      );
     }
   }
 
@@ -143,15 +151,13 @@ export class HermesClient {
 
   async search(query: string): Promise<string> {
     try {
-      let tools = {};
-
-      if (!this.fallbackMode && this.mcpClient) {
-        tools = await this.mcpClient.tools();
+      if (!this.mcpClient) {
+        throw new Error("MCP client not connected. Call connect() first.");
       }
 
-      const systemMessage = this.fallbackMode
-        ? "You are a helpful assistant. Answer questions using your knowledge base."
-        : "You are a helpful search assistant powered by the Hermes search engine. Use the available MCP tools when possible to search for information and provide comprehensive answers.";
+      const tools = await this.mcpClient.tools();
+      const systemMessage =
+        "You are a helpful search assistant powered by the Hermes search engine. Use the available MCP tools when possible to search for information and provide comprehensive answers.";
 
       const result = await generateText({
         model: this.model,
@@ -186,23 +192,15 @@ export class HermesClient {
     try {
       console.log(`🔍 Searching: "${query}"`);
 
-      if (this.fallbackMode) {
-        console.log(
-          "📡 Streaming response (fallback mode - no MCP tools)...\n"
-        );
-      } else {
-        console.log("📡 Streaming response with MCP tools...\n");
+      if (!this.mcpClient) {
+        throw new Error("MCP client not connected. Call connect() first.");
       }
 
-      let tools = {};
+      console.log("📡 Streaming response with MCP tools...\n");
 
-      if (!this.fallbackMode && this.mcpClient) {
-        tools = await this.mcpClient.tools();
-      }
-
-      const systemMessage = this.fallbackMode
-        ? "You are a helpful assistant. Answer questions using your knowledge base."
-        : "You are a helpful search assistant powered by the Hermes search engine. Use the available MCP tools when possible to search for information and provide comprehensive answers.";
+      const tools = await this.mcpClient.tools();
+      const systemMessage =
+        "You are a helpful search assistant powered by the Hermes search engine. Use the available MCP tools when possible to search for information and provide comprehensive answers.";
 
       const result = streamText({
         model: this.model,
@@ -226,7 +224,7 @@ export class HermesClient {
         },
         onFinish: async () => {
           // Close MCP client when streaming finishes (best practice from AI SDK docs)
-          if (!this.fallbackMode && this.mcpClient) {
+          if (this.mcpClient) {
             await this.mcpClient.close();
             this.mcpClient = null;
           }
@@ -248,14 +246,6 @@ export class HermesClient {
 
   async listAvailableTools(): Promise<void> {
     try {
-      if (this.fallbackMode) {
-        console.log("🛠️  Running in fallback mode - no MCP tools available");
-        console.log(
-          "   The Hermes MCP server is not accessible, using OpenAI knowledge base only"
-        );
-        return;
-      }
-
       if (!this.mcpClient) {
         console.log("⚠️  MCP client not connected. Call connect() first.");
         return;
@@ -279,9 +269,8 @@ export class HermesClient {
 
   async searchWithTypedTools(query: string): Promise<string> {
     try {
-      if (this.fallbackMode || !this.mcpClient) {
-        // Fall back to regular search without MCP tools
-        return await this.search(query);
+      if (!this.mcpClient) {
+        throw new Error("MCP client not connected. Call connect() first.");
       }
 
       // Schema Definition approach for better type safety (as per AI SDK docs)
@@ -326,8 +315,7 @@ export class HermesClient {
       return result.text || "No response received";
     } catch (error) {
       console.error("❌ Typed search failed:", error);
-      // Fall back to regular search
-      return await this.search(query);
+      throw error;
     }
   }
 
@@ -341,17 +329,30 @@ export class HermesClient {
     }
   ): Promise<z.infer<T>> {
     try {
-      let tools = {};
-
-      if (!this.fallbackMode && this.mcpClient) {
-        tools = await this.mcpClient.tools();
+      if (!this.mcpClient) {
+        throw new Error("MCP client not connected. Call connect() first.");
       }
 
-      const { latitude, longitude, useLegacyFormat = false } = options || {};
+      const tools = await this.mcpClient.tools();
 
-      const systemMessage = this.fallbackMode
-        ? `You are a helpful assistant. Answer questions using your knowledge base. You must respond with valid JSON that matches the provided schema.`
-        : `You are a helpful search assistant powered by the Hermes search engine. Use the available MCP tools when possible to search for information and provide comprehensive answers. You must respond with valid JSON that matches the provided schema.`;
+      const {
+        latitude: _latitude,
+        longitude: _longitude,
+        useLegacyFormat: _useLegacyFormat = false,
+      } = options || {};
+
+      const systemMessage = `You are a helpful search assistant powered by the Hermes search engine. Use the available MCP tools when possible to search for information and provide comprehensive answers. 
+
+IMPORTANT: You must respond with valid JSON only (no markdown formatting, no code blocks). The response must exactly match the required schema structure. If no data is found, return empty arrays for the required fields rather than error messages.
+
+Example valid response format:
+{
+  "areas": [],
+  "geographies": [],
+  "brands": [],
+  "business_categories": [],
+  "object": "ai_search"
+}`;
 
       const result = await generateText({
         model: this.model,
@@ -364,7 +365,7 @@ export class HermesClient {
           },
           {
             role: "user",
-            content: query,
+            content: `${query}\n\nYou must respond with a JSON object that exactly matches this schema:\n${responseSchema.toString()}`,
           },
         ],
         onStepFinish({ toolCalls }) {
@@ -377,7 +378,17 @@ export class HermesClient {
       const responseText = result.text || "{}";
 
       try {
-        const parsed = JSON.parse(responseText);
+        // Handle responses wrapped in markdown code blocks
+        let jsonText = responseText.trim();
+
+        // Remove markdown code block wrappers if present
+        if (jsonText.startsWith("```json")) {
+          jsonText = jsonText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+        } else if (jsonText.startsWith("```")) {
+          jsonText = jsonText.replace(/^```\s*/, "").replace(/\s*```$/, "");
+        }
+
+        const parsed = JSON.parse(jsonText);
         return responseSchema.parse(parsed);
       } catch (parseError) {
         console.error("❌ Failed to parse response as JSON:", parseError);
@@ -396,7 +407,7 @@ export class HermesClient {
       longitude?: number;
     }
   ): Promise<AgenticAISearchResponse> {
-    return this.searchWithStructuredOutput(
+    return await this.searchWithStructuredOutput(
       query,
       AgenticAISearchResponseSchema,
       options
@@ -410,7 +421,7 @@ export class HermesClient {
       longitude?: number;
     }
   ): Promise<LegacyAISearchResponse> {
-    return this.searchWithStructuredOutput(
+    return await this.searchWithStructuredOutput(
       query,
       LegacyAISearchResponseSchema,
       { ...options, useLegacyFormat: true }
@@ -425,7 +436,7 @@ export class HermesClient {
       longitude?: number;
     }
   ): Promise<z.infer<T>> {
-    return this.searchWithStructuredOutput(query, schema, options);
+    return await this.searchWithStructuredOutput(query, schema, options);
   }
 }
 

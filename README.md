@@ -28,7 +28,7 @@ Create a `.env` file in the project root with your credentials:
 OPENAI_API_KEY=sk-your-actual-openai-api-key-here
 
 # Hermes MCP server URL (provided for demo purposes)
-HERMES_MCP_URL=https://hermes-dataplor-e0ce1df86095.herokuapp.com
+HERMES_MCP_URL=https://hermes-dataplor-e0ce1df86095.herokuapp.com/mcp
 ```
 
 **Important Notes:**
