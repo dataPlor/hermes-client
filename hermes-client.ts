@@ -9,6 +9,75 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
+// Hermes Response Schemas
+export const AgenticAISearchResponseSchema = z.object({
+  object: z.literal("ai_search"),
+  query: z.string(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  message: z.string(),
+  error: z.boolean().optional(),
+});
+
+export type AgenticAISearchResponse = z.infer<
+  typeof AgenticAISearchResponseSchema
+>;
+
+export const AreaSchema = z.object({
+  uuid: z.string(),
+  object: z.literal("area"),
+  primary_name: z.string(),
+  region: z.string(),
+  bbox_xmin: z.number(),
+  bbox_xmax: z.number(),
+  bbox_ymin: z.number(),
+  bbox_ymax: z.number(),
+  zip_code: z.string().optional(),
+});
+
+export const BrandSchema = z.object({
+  key: z.string(),
+  name: z.string(),
+  business_category_ids: z.array(z.string()).optional(),
+  object: z.literal("brand"),
+});
+
+export const BusinessCategorySchema = z.object({
+  key: z.string(),
+  en: z.string(),
+  path: z.string(),
+  object: z.literal("business_category"),
+});
+
+export const LegacyAISearchResponseSchema = z.object({
+  object: z.literal("ai_search"),
+  areas: z.array(AreaSchema),
+  geographies: z.array(AreaSchema),
+  brands: z.array(BrandSchema),
+  business_categories: z.array(BusinessCategorySchema),
+});
+
+export type LegacyAISearchResponse = z.infer<
+  typeof LegacyAISearchResponseSchema
+>;
+
+export const AISearchErrorResponseSchema = z.object({
+  error: z.object({
+    code: z.string(),
+    message: z.string(),
+  }),
+});
+
+export type AISearchErrorResponse = z.infer<typeof AISearchErrorResponseSchema>;
+
+export const AISearchResponseSchema = z.union([
+  AgenticAISearchResponseSchema,
+  LegacyAISearchResponseSchema,
+  AISearchErrorResponseSchema,
+]);
+
+export type AISearchResponse = z.infer<typeof AISearchResponseSchema>;
+
 const env = await load();
 
 if (!env.OPENAI_API_KEY) {
@@ -260,6 +329,103 @@ export class HermesClient {
       // Fall back to regular search
       return await this.search(query);
     }
+  }
+
+  async searchWithStructuredOutput<T extends z.ZodType>(
+    query: string,
+    responseSchema: T,
+    options?: {
+      latitude?: number;
+      longitude?: number;
+      useLegacyFormat?: boolean;
+    }
+  ): Promise<z.infer<T>> {
+    try {
+      let tools = {};
+
+      if (!this.fallbackMode && this.mcpClient) {
+        tools = await this.mcpClient.tools();
+      }
+
+      const { latitude, longitude, useLegacyFormat = false } = options || {};
+
+      const systemMessage = this.fallbackMode
+        ? `You are a helpful assistant. Answer questions using your knowledge base. You must respond with valid JSON that matches the provided schema.`
+        : `You are a helpful search assistant powered by the Hermes search engine. Use the available MCP tools when possible to search for information and provide comprehensive answers. You must respond with valid JSON that matches the provided schema.`;
+
+      const result = await generateText({
+        model: this.model,
+        tools,
+        maxSteps: 5,
+        messages: [
+          {
+            role: "system",
+            content: systemMessage,
+          },
+          {
+            role: "user",
+            content: query,
+          },
+        ],
+        onStepFinish({ toolCalls }) {
+          if (toolCalls && toolCalls.length > 0) {
+            console.log(`🔧 Executed ${toolCalls.length} tool call(s)`);
+          }
+        },
+      });
+
+      const responseText = result.text || "{}";
+
+      try {
+        const parsed = JSON.parse(responseText);
+        return responseSchema.parse(parsed);
+      } catch (parseError) {
+        console.error("❌ Failed to parse response as JSON:", parseError);
+        throw new Error(`Invalid JSON response: ${responseText}`);
+      }
+    } catch (error) {
+      console.error("❌ Structured search failed:", error);
+      throw error;
+    }
+  }
+
+  async searchWithAgenticFormat(
+    query: string,
+    options?: {
+      latitude?: number;
+      longitude?: number;
+    }
+  ): Promise<AgenticAISearchResponse> {
+    return this.searchWithStructuredOutput(
+      query,
+      AgenticAISearchResponseSchema,
+      options
+    );
+  }
+
+  async searchWithLegacyFormat(
+    query: string,
+    options?: {
+      latitude?: number;
+      longitude?: number;
+    }
+  ): Promise<LegacyAISearchResponse> {
+    return this.searchWithStructuredOutput(
+      query,
+      LegacyAISearchResponseSchema,
+      { ...options, useLegacyFormat: true }
+    );
+  }
+
+  async searchWithCustomSchema<T extends z.ZodType>(
+    query: string,
+    schema: T,
+    options?: {
+      latitude?: number;
+      longitude?: number;
+    }
+  ): Promise<z.infer<T>> {
+    return this.searchWithStructuredOutput(query, schema, options);
   }
 }
 

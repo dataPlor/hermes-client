@@ -7,6 +7,7 @@
     "start": "deno run --allow-net --allow-read --allow-env mod.ts",
     "hermes": "deno run --allow-net --allow-read --allow-env hermes-client.ts",
     "hermes-example": "deno run --allow-net --allow-read --allow-env hermes-example.ts",
+    "hermes-structured": "deno run --allow-net --allow-read --allow-env hermes-structured-example.ts",
     "test": "deno test --allow-all",
     "fmt": "deno fmt",
     "lint": "deno lint"
